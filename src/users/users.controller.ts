@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDTO } from './DTO/create-user.dto';
 import { UserDto } from './DTO/user.dto';
 import { CreateUserResponse } from './DTO/create-user-response.dto';
+import { PaginatedUserResponse } from './DTO/paginated-user-response.dto';
 
 @Controller('users')
 export class UsersController {
@@ -41,9 +42,30 @@ export class UsersController {
     async getAllUsers(
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10
-    ) 
-    {
-        return this.usersService.getAllUsers(page, limit);
+    ): Promise<PaginatedUserResponse>{
+
+    return this.usersService.getAllUsers(page, limit);
 
     }
+    
+
+    @Get(':id')
+    async getUserById(@Param('id') id: string){
+    
+      try {
+        return await this.usersService.getUserById(id);
+      
+      } catch (error) {
+        if(error instanceof HttpException) {
+          throw error;
+        }
+
+        throw new HttpException(
+          { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error interno del servidor' },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+      
+
 }
