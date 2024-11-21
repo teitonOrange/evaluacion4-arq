@@ -1,3 +1,4 @@
+
 export class GetUserDTO {
     id: string;
     name: string;
