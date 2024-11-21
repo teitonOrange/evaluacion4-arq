@@ -19,4 +19,5 @@ model User {
   apellidos    String
   password     String
   isDeleted    Boolean @default(false)  
+  
 }   
