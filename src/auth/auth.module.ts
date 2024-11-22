@@ -6,7 +6,6 @@ import { AuthService } from './auth.service';
   imports: [
     JwtModule.register({
       secret: 'your-secret-key', // Define tu clave secreta aquí
-      signOptions: { expiresIn: '60d' }, // Duración predeterminada
     }),
   ],
   providers: [AuthService],
