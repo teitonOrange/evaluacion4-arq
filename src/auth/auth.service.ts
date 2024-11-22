@@ -5,11 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   constructor(private jwtService: JwtService) {}
 
-  // Generar un token JWT
-  generateToken(): string {
-    const payload = { client: 'api-consumer' }; // Carga útil básica
-    return this.jwtService.sign(payload, { expiresIn: '60d' }); // Duración de 60 días
-  }
+  
 
   // Verificar un token JWT
   verifyToken(token: string): boolean {
