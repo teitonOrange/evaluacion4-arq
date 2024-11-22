@@ -6,6 +6,7 @@ import { CreateUserResponse } from './DTO/create-user-response.dto';
 import { PaginatedUserResponse } from './DTO/paginated-user-response.dto';
 
 @Controller('users')
+//guard para las rutas
 export class UsersController {
 
     constructor(private readonly usersService: UsersService) {}
