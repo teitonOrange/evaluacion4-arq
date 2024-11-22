@@ -1,20 +1,15 @@
 import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDTO } from './DTO/create-user.dto';
-import { UserDto } from './DTO/user.dto';
 import { CreateUserResponse } from './DTO/create-user-response.dto';
 import { PaginatedUserResponse } from './DTO/paginated-user-response.dto';
 
 @Controller('users')
-//guard para las rutas
 export class UsersController {
 
     constructor(private readonly usersService: UsersService) {}
 
-    // @Post()
-    // createUser(@Body() dto: CreateUserDTO) : Promise<UserDto> {
-    //     return this.usersService.createUser(dto);
-    // }
+    
     @Post()
     @HttpCode(HttpStatus.CREATED) // Código 201 por defecto para POST exitoso
     async createUser(@Body() dto: CreateUserDTO): Promise<CreateUserResponse>{
@@ -70,3 +65,4 @@ export class UsersController {
       
 
 }
+
