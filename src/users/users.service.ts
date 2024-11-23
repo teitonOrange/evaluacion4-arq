@@ -23,7 +23,6 @@ export class UsersService {
         });
     }
 
-    //todo
     async getAllUsers(page: number, limit: number): Promise<PaginatedUserResponse>{
         const pageNumber = Number(page);
         const limitNumber = Number(limit);
@@ -41,18 +40,26 @@ export class UsersService {
                 isDeleted: false, // Solo usuarios que no están softdeleted
             },
         }); // Total de usuarios en la base de datos
+
+        if (skip >= total) {
+            throw new HttpException(
+              { statusCode: HttpStatus.BAD_REQUEST, message: 'Page fuera de rango.' },
+              HttpStatus.BAD_REQUEST,
+            );
+          }
         const users = await this.prisma.user.findMany({
           skip,
           take: limitNumber,
           where: {
             isDeleted: false, // Solo usuarios que no están softdeleted
           },
+          orderBy: {apellidos: 'asc'},
         });
     
         return {
             
             statusCode: HttpStatus.OK,
-            message: 'Usuarios obtenidos con éxito.',
+            message: 'Usuarios obtenidos con éxito. Ordenados alfabeticamente',
             user: users,
             total,
             page: pageNumber,
