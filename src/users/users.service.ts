@@ -70,7 +70,6 @@ export class UsersService {
         };  
     }
 
-    //TO DO: terminar todo xd
     async getUserById(id: string){
         try{
             const user = await this.prisma.user.findUnique({
