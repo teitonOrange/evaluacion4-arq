@@ -5,6 +5,7 @@ import { CreateUserResponse } from './DTO/create-user-response.dto';
 import { UserDto } from './DTO/user.dto';
 import { User } from '@prisma/client';
 import { PaginatedUserResponse } from './DTO/paginated-user-response.dto';
+import { isUUID } from 'class-validator';
 @Injectable()
 export class UsersService {
     constructor(private prisma: PrismaService) {}
@@ -70,27 +71,56 @@ export class UsersService {
         };  
     }
 
-    //TO DO: terminar todo xd
-    async getUserById(id: string){
-        try{
-            const user = await this.prisma.user.findUnique({
-                where: { id },
-         });
-            
-            if(!user) {
-                throw new HttpException(
-                    { statusCode: HttpStatus.NOT_FOUND, message: 'Usuario no encontrado' },
-                    HttpStatus.NOT_FOUND,
-                )
-            }
-            return user;
-        } catch (error) {
+    async getUserById(id: string) {
+        try {
+          // Validar el formato del ID 
+          if (!id || typeof id !== 'string' || id.trim() === '' || !isUUID(id)) {
             throw new HttpException(
-                { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error interno del servidor' },
-                HttpStatus.INTERNAL_SERVER_ERROR,
+              { statusCode: HttpStatus.BAD_REQUEST, message: 'El formato del ID no es válido' },
+              HttpStatus.BAD_REQUEST,
             );
+          }
+      
+          // Buscar usuario por ID
+          const user = await this.prisma.user.findUnique({
+            where: { id },
+          });
+      
+          // Validar si el usuario existe
+          if (!user) {
+            throw new HttpException(
+              { statusCode: HttpStatus.NOT_FOUND, message: 'Usuario no encontrado' },
+              HttpStatus.NOT_FOUND,
+            );
+          }
+      
+          // Validar si el usuario está marcado como eliminado
+          if (user.isDeleted) {
+            throw new HttpException(
+              { statusCode: HttpStatus.GONE, message: 'El usuario está eliminado' },
+              HttpStatus.GONE,
+            );
+          }
+      
+          // Retornar el usuario si pasa todas las validaciones
+          return {
+            statusCode: HttpStatus.OK,
+            message: 'Usuario encontrado con éxito',
+            data: user,
+          };
+        } catch (error) {
+          // Manejo genérico de errores internos del servidor
+          if (!(error instanceof HttpException)) {
+            throw new HttpException(
+              { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error interno del servidor' },
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+          }
+          // Propagar cualquier error que ya sea una HttpException
+          throw error;
         }
-    }
+      }
+      
 
     async updateUser(id: string, data: { name?: string; email?: string; apellidos?: string; password?: string; isDeleted?: boolean; })
     {
