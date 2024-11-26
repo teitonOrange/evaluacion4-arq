@@ -7,7 +7,8 @@ Incluye las siguientes características principales:
 
 - **Cumplimiento de Códigos HTTP:**
   - **201:** Cuando se crea un usuario exitosamente.
-  - **400:** Para solicitudes mal formadas, como la falta de atributos obligatorios o cuando el correo electrónico ya está registrado.
+  - **204:** Cuando se elimina un usuario y el servidor no entrega respuesta.
+  - **400:** Para solicitudes mal formadas, como la falta de atributos obligatorios.
   - **404:** Cuando se intenta acceder a un usuario inexistente.
   - **410:** Cuando algun recurso he sido eliminado.
   - **500:** Para errores inesperados del servidor.
@@ -16,7 +17,6 @@ Incluye las siguientes características principales:
   - **Seguridad:** Es necesario proporcionar el token de acceso mediante los header de la solicitud
 
 
-El proyecto está desarrollado con una estructura modular, siguiendo las mejores prácticas de NestJS para asegurar escalabilidad y mantenibilidad.
 
 ---
 
@@ -58,3 +58,9 @@ Producción:
 
     ```bash 
     $ npm run start:prod
+---
+## Autores
+
+- **Nicolas Gonzalez Caro** [GitHub](https://github.com/teitonOrange)
+- **Rey Valdes Marangunic** [GitHub](https://github.com/rexwar)
+
