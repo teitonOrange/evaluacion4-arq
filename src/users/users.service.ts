@@ -142,6 +142,14 @@ export class UsersService {
               HttpStatus.NOT_FOUND,
             );
           }
+
+            // Verificar si el usuario está eliminado
+          if (existingUser.isDeleted) {
+            throw new HttpException(
+              { statusCode: HttpStatus.FORBIDDEN, message: 'No se puede actualizar un usuario eliminado' },
+                HttpStatus.FORBIDDEN,
+            );
+          }
     
           // Hashear la contraseña si es proporcionada
           if (updateUserDTO.password) {
