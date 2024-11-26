@@ -1,11 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDTO } from './DTO/create-user.dto';
-import { CreateUserResponse } from './DTO/create-user-response.dto';
+
 import { UserDto } from './DTO/user.dto';
-import { User } from '@prisma/client';
+
 import { PaginatedUserResponse } from './DTO/paginated-user-response.dto';
 import { isUUID } from 'class-validator';
+
+import * as bcrypt from 'bcrypt';
+import { UpdateUserDTO } from './DTO/update-user.dto';
+
 @Injectable()
 export class UsersService {
     constructor(private prisma: PrismaService) {}
@@ -13,12 +17,14 @@ export class UsersService {
     async createUser(CreateUserDTO: CreateUserDTO): Promise<UserDto>{
         
         const { name, email, apellidos, password, isDeleted } = CreateUserDTO;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         return this.prisma.user.create({
             data: { 
                 name, 
                 email, 
                 apellidos, 
-                password, 
+                password: hashedPassword, 
                 isDeleted 
             } 
         });
@@ -122,10 +128,57 @@ export class UsersService {
       }
       
 
-    async updateUser(id: string, data: { name?: string; email?: string; apellidos?: string; password?: string; isDeleted?: boolean; })
-    {
-        return this.prisma.user.update({ where: { id }, data });
-    }
+    
+      async updateUser(id: string, updateUserDTO: UpdateUserDTO): Promise<UserDto> {
+        try {
+          // Buscar usuario existente
+          const existingUser = await this.prisma.user.findUnique({
+            where: { id },
+          });
+    
+          if (!existingUser) {
+            throw new HttpException(
+              { statusCode: HttpStatus.NOT_FOUND, message: 'Usuario no encontrado' },
+              HttpStatus.NOT_FOUND,
+            );
+          }
+    
+          // Hashear la contraseña si es proporcionada
+          if (updateUserDTO.password) {
+            updateUserDTO.password = await bcrypt.hash(updateUserDTO.password, 10);
+          }
+    
+        
+    
+          // Actualizar el usuario
+          const updatedUser = await this.prisma.user.update({
+            where: { id },
+            data: updateUserDTO,
+          });
+    
+          // Mapear el resultado al DTO de respuesta
+          return {
+            id: updatedUser.id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            apellidos: updatedUser.apellidos,
+            isDeleted: updatedUser.isDeleted,
+          };
+        } catch (error) {
+          if (error instanceof HttpException) {
+            throw error; // Re-lanzar excepciones de tipo HttpException
+          }
+    
+          throw new HttpException(
+            {
+              statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: 'Error interno del servidor',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
+
 
     async softDeleteUser(id: string): Promise<boolean> {
       try {
