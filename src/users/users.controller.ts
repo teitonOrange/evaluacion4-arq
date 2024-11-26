@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, Post, Query, Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDTO } from './DTO/create-user.dto';
 import { CreateUserResponse } from './DTO/create-user-response.dto';
@@ -62,7 +62,31 @@ export class UsersController {
         );
       }
     }
-      
+
+    @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT) // Código 204 para DELETE exitoso
+  async deleteUser(@Param('id') id: string): Promise<void> {
+    try {
+      const userDeleted = await this.usersService.softDeleteUser(id);
+
+      if (!userDeleted) {
+        throw new HttpException(
+          { statusCode: HttpStatus.NOT_FOUND, message: 'Usuario no encontrado' },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error interno del servidor' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  
+  }
 
 }
 

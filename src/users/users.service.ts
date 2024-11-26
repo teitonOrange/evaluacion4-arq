@@ -127,10 +127,30 @@ export class UsersService {
         return this.prisma.user.update({ where: { id }, data });
     }
 
-    async deleteUser(id: string)
-    {
-        return this.prisma.user.delete({ where: { id } });
+    async softDeleteUser(id: string): Promise<boolean> {
+      try {
+        // Verificar si el usuario existe
+        const user = await this.prisma.user.findUnique({
+          where: { id },
+        });
+  
+        if (!user || user.isDeleted) {
+          return false; // Usuario no encontrado o ya eliminado
+        }
+  
+        // Actualizar la propiedad isDeleted a true (soft delete)
+        await this.prisma.user.update({
+          where: { id },
+          data: { isDeleted: true },
+        });
+  
+        return true; // Soft delete exitoso
+      } catch (error) {
+        throw new HttpException(
+          { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error interno del servidor' },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
-
 
 }
